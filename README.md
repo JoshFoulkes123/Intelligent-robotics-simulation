@@ -1,12 +1,15 @@
 # Intelligent-robotics-simulation
-basic simulation for the intellegient robotics assignment
+Basic simulation for the intellegient robotics assignment.
+Simulation with turtlebot3 in cafe with 4 tables.
 
-you will need the tutlebot3 repository downloaded
-do this run this command(i think) in your workspace repository folder
+You will need the tutlebot3 repository downloaded.
+Do this run this command(i think) in your workspace repository folder:
 
-git clone -b kinetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+`git clone -b kinetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git`
 
-then to launch the simulation run
+Then run catkin_make.
 
-roslaunch my_simluations my_world.launch
+To launch the simulation run:
+
+`roslaunch my_simluations my_world.launch`
 
