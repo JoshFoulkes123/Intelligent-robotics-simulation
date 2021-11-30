@@ -5,7 +5,7 @@ Simulation with turtlebot3 in cafe with 4 tables.
 You will need the tutlebot3 repository downloaded.
 Do this run this command(i think) in your workspace repository folder:
 
-`git clone -b kinetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git`
+`git clone https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git`
 
 Then run catkin_make.
 
