@@ -1,0 +1,4 @@
+uint8 ready
+---
+int16 table_deliver
+int16 table_clean
