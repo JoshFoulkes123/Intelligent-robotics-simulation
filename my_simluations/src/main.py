@@ -21,12 +21,14 @@ kitchen_coordinates = [-1,-1.2,0]
 #tables_receive = rospy.Service('/tables_', _TABLES, )
 
 def request_tables_client():
-    rospy.wait_for_service('tables')
+    rospy.wait_for_service('/queuemanager')
     flipper = 1
     try:
 
-        tables_return = rospy.ServiceProxy('tables', _TABLES)
+        tables_return = rospy.ServiceProxy('/queuemanager', _TABLES)
         resp = tables_return(flipper)
+        print("Deliver: "+str(resp.table_deliver))
+        print("Clean: "+str(resp.table_clean))
         return resp
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
