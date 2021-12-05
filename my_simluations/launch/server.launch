@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<launch>
-<node pkg="my_simluations" name = "UI" type="ui.py" output="screen">
-</node>
-
-<node pkg="my_simluations" name = "queue_server" type="queue_server.py" output="screen">
-</node>
-</launch>
