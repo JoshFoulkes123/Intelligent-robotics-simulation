@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
+
 from math import sqrt, cos, sin, atan2
 
 MAP_WIDTH = 384
-MAP_HEIGHT = 832
+MAP_HEIGHT = 864
 LASER_MAX = 8.0
+RESOLUTION = 0.05
+CENTER_X = 230
+CENTER_Y = 340
 
 
 def world_to_pixel(world_points, image_size):
@@ -37,6 +42,16 @@ def worldtheta_to_pixeltheta(world_theta):
     y = 1 * sin(world_theta)
     # since the y axis is inverted in the map the angle will be different
     return atan2(-y, x)
+
+def pixel_to_real(_x, _y):
+    x = x *RESOLUTION
+    y = _y*RESOLUTION
+    return x,y
+
+def real_to_pixel(_x,_y):
+    x = int(_x/RESOLUTION)
+    y = int(_y/RESOLUTION)
+    return x,y
 
 
 def dist(point_a, point_b):

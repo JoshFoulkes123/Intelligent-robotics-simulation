@@ -12,7 +12,7 @@ from my_simluations.srv import goalResponse as _GOAL_resp
 from visualization_msgs.msg import MarkerArray, Marker
 import time
 import math
-from transformations import world_to_pixel, pixel_to_world, worldtheta_to_pixeltheta
+from transformations import world_to_pixel, pixel_to_world, worldtheta_to_pixeltheta, real_to_pixel, pixel_to_real
 import actionlib
 from move_base_msgs.msg import MoveBaseGoal,MoveBaseAction
 from geometry_msgs.msg import Twist , Point , Quaternion, Pose, PoseWithCovarianceStamped
@@ -26,18 +26,18 @@ completeAStarMap = []
 
 
 def read_map():
-    img = open('/home/mandarpatil/robotics/src/my_simluations/data/cafe_map.pgm', 'rb')
-    
+    img = open('/home/josh/catkin_ws/src/my_simluations/data/cafe_map.pgm', 'rb')
+
     #Header values before width and height
     img.readline()
     img.readline()
-    
+
     (width, height) = [int(i) for i in img.readline().split()]
     depth = int(img.readline())
     assert depth <= 255
-    
+
     aStarMap = []
-    
+
     for y in range(height):
         row = []
         for y in range(width):
@@ -45,11 +45,11 @@ def read_map():
             if val < 100:
                 row.append(0)
             elif val == 254:
-                row.append(1)   
+                row.append(1)
             else:
-                row.append(-1)  
+                row.append(-1)
         aStarMap.append(row)
-                    
+
     #print(aStarMap)
     print("map made")
     return aStarMap
@@ -62,7 +62,7 @@ class aStarNode():
         self.position = position
         self.x = position[0]
         self.y = position[1]
-        
+
         self.h = 0
         self.g = 0
         self.f = 0
@@ -72,35 +72,35 @@ class aStarNode():
             return '(' + str(self.x) + ',' + str(self.y) + ') [' + str(self.g) + ',' + str(self.h) + ',' + str(self.f)+  ']'
         else:
             return '(' + str(self.x) + ',' + str(self.y) + ') [' + str(self.g) + ',' + str(self.h) + ',' + str(self.f) + '] {' + str(completeAStarMap[self.y][self.x]) + '}'
-    
+
 
 def a_star_calculation(start, end):
     completeAStarMap = read_map()
 #   print(completeAStarMap)
     width = len(completeAStarMap[0])
     height = len(completeAStarMap)
-    
+
     print(width)
     print(height)
-            
+
     openList = []
     closedList = []
-    
+
     openList.append(aStarNode(None, (start['x'], start['y'])))
-    
+
     while not (len(openList) == 0 or len(openList) > 10000000):
-    
-        currentNode = openList[0]     
+
+        currentNode = openList[0]
         currentNodeNum = 0
-        
+
         for i in range(len(openList)):
             if openList[i].f < currentNode.f:
                 currentNode = openList[i]
                 currentNodeNum = i
-                
-        openList.pop(currentNodeNum) 
-        closedList.append(currentNode)    
-        
+
+        openList.pop(currentNodeNum)
+        closedList.append(currentNode)
+
   #      print('Start Node: (' + str(start['x']) + ',' + str(start['y']) + ')')
  ##       print('End Node: (' + str(end['x']) + ',' + str(end['y']) + ')')
 ##       print('Current Node: (' + str(currentNode.x) + ',' + str(currentNode.y) + ')')
@@ -110,14 +110,14 @@ def a_star_calculation(start, end):
 #        print()
 #        print("OPEN LIST")
 #        for node in openList:
-#            print('(' + str(node['x']) + ',' + str(node['y']) + ')')    
+#            print('(' + str(node['x']) + ',' + str(node['y']) + ')')
 #        print()
 #        print("CLOSED LIST")
 #        for node in closedList:
 #            print('(' + str(node['x']) + ',' + str(node['y']) + ')')
 #        print()
 #        time.sleep(1)
-        
+
         if currentNode.x == end['x'] and currentNode.y == end['y']:
             path_to_end = []
             current_node = currentNode
@@ -127,72 +127,72 @@ def a_star_calculation(start, end):
             return path_to_end[::-1]
         else:
             children = []
-            
+
             for child_position_rel in [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]:
-                child_position = (currentNode.x + child_position_rel[0], currentNode.y + child_position_rel[1]) 
+                child_position = (currentNode.x + child_position_rel[0], currentNode.y + child_position_rel[1])
 
                 if child_position[0] < 0 or child_position[0] >= width or child_position[1] < 0 or child_position[1] >= height:
                     continue
-                    
+
                 if completeAStarMap[child_position[1]][child_position[0]] != 1:
                     continue
-                    
+
                 child = aStarNode(currentNode, child_position)
                 child.parent = currentNode
 
 #                print(child.toString())
                 children.append(child)
-                
+
 #            if currentNode['x'] > 0:
 #                if currentNode['y'] > 0:
-#                    children.append(a_star_nodes[x-1][y-1])                
+#                    children.append(a_star_nodes[x-1][y-1])
 #                if currentNode['y'] < height - 1:
-#                    children.append(a_star_nodes[x-1][y+1])    
+#                    children.append(a_star_nodes[x-1][y+1])
 #            if currentNode['x'] < width - 1:
 #                children.append(a_star_nodes[x+1][y])
 #                if currentNode['y'] > 0:
-#                    children.append(a_star_nodes[x+1][y-1])                
+#                    children.append(a_star_nodes[x+1][y-1])
 #                if currentNode['y'] < height - 1:
-#                    children.append(a_star_nodes[x+1][y+1])     
+#                    children.append(a_star_nodes[x+1][y+1])
 #            if currentNode['y'] > 0:
-#                children.append(a_star_nodes[x][y-1])                
+#                children.append(a_star_nodes[x][y-1])
 #            if currentNode['y'] < height - 1:
-#                children.append(a_star_nodes[x][y+1])    
-            
+#                children.append(a_star_nodes[x][y+1])
+
             for i in range(len(children)):
                 skip = False
                 for node in closedList:
                     if node.x == children[i].x and node.y == children[i].y:
                         skip = True
                         break
-                        
-                if skip: 
+
+                if skip:
                     continue
 
                 children[i].g = currentNode.g + math.hypot(children[i].x - currentNode.x, children[i].y - currentNode.y)
                 children[i].h = math.hypot(end['x'] - children[i].x, end['y']-children[i].y)
                 children[i].f = children[i].g + children[i].h
-                
+
                 for open_node in openList:
                     if open_node.x == children[i].x and open_node.y == children[i].y:
                         if children[i].g >= open_node.g:
                             skip = True
                             break
 
-                if skip: 
+                if skip:
                     continue
-                        
+
                 openList.append(children[i])
 
-     
+
 def navigate(x,y,orientation):
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = 'map'
     goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose = Pose(Point(x,y,0.0),Quaternion(orientation.x,orientation.y,orientation.z,orientation.w)) ##sending according to amcl 
+    goal.target_pose.pose = Pose(Point(x,y,0.0),Quaternion(orientation.x,orientation.y,orientation.z,orientation.w)) ##sending according to amcl
     global move_base
     move_base.send_goal(goal)
-    
+
     #Allow the waiter to complete the task..need to vary the seconds accordingly
     success = move_base.wait_for_result(rospy.Duration(5))
     state = move_base.get_state()
@@ -212,8 +212,7 @@ def amcl_callback(msg):
 
 def go_to_place(request):
     time.sleep(3)
-    x= int(request.x)
-    y= int(request.y)
+    x,y= real_to_pixel(request.x,request.y)
     yaw= request.yaw
 
     end = {'x':x,'y':y}
@@ -229,7 +228,10 @@ def go_to_place(request):
     print(amcl_pose)
     if amcl_pose is not None:
         print("inside amcl_pose not NONE")
-        start= {'x':int(amcl_pose.position.x),'y':int(amcl_pose.position.y)}
+        _x_,_y_ = real_to_pixel(amcl_pose.position.x,amcl_pose.position.y)
+        start= {'x': _x_,'y': _y_}
+        _start = {'x':amcl_pose.position.x,'y': amcl_pose.position.y}
+    print(_start)
     print(start)
     print(end)
 
@@ -244,8 +246,8 @@ def go_to_place(request):
     # pixel_points=world_to_pixel(world_points,image_size)
     # start = {'x':pixel_points[0],'y':pixel_points[1]}
 
-    #paths =a_star_calculation(start,end)
-    paths =a_star_calculation({'x':101, 'y':230}, {'x':190, 'y':275})
+    paths =a_star_calculation(start,end)
+    #paths =a_star_calculation({'x':101, 'y':230}, {'x':190, 'y':275})
     print(paths)
     time.sleep(1000)
     #waht about the yaw
@@ -263,9 +265,9 @@ def go_to_place(request):
             # wait for a few second
             #get the current coordinates and call go_to_place(req)
         print("reached pose")
-    
-    
-    
+
+
+
     print("At destination:")
     print("x: " +str(end.x))
     print("y: " +str(end.y))
@@ -291,6 +293,6 @@ if __name__ == "__main__":
     print("wait for server to come up")
     rospy.init_node("pathfinder")
     rospy.loginfo("hello from pathfinder")
-    move_base.wait_for_server(rospy.Duration(5)) #takes up to five seconds 
+    move_base.wait_for_server(rospy.Duration(5)) #takes up to five seconds
     print("Starting PathFinding and Navigation service")
     pathfinder_server()
