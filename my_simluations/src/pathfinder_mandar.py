@@ -104,7 +104,7 @@ def a_star_calculation(start, end):
   #      print('Start Node: (' + str(start['x']) + ',' + str(start['y']) + ')')
  ##       print('End Node: (' + str(end['x']) + ',' + str(end['y']) + ')')
 ##       print('Current Node: (' + str(currentNode.x) + ',' + str(currentNode.y) + ')')
-        print('Current Node: ' + currentNode.toString(completeAStarMap))
+        #print('Current Node: ' + currentNode.toString(completeAStarMap))
         #print('Size Open List: ' + str(len(openList)))
 #        print('Size Closed List: ' + str(len(closedList)))
 #        print()
@@ -185,11 +185,34 @@ def a_star_calculation(start, end):
                 openList.append(children[i])
 
 
-def navigate(x,y,orientation):
+
+
+# def slope(p1, p2):
+# 	delta_y = p2[1]-p1[1]
+# 	delta_x = p2[0]-p1[0]
+# 	return delta_y/delta_x if delta_x!=0 else float('inf')
+#
+# def euclidean_distance():
+#
+# 	return math.sqrt(math.pow((self.goal[0]-self.pos.position.x),2) + math.pow((self.goal[1]-self.pos.position.y),2))
+#
+# def angular_difference():
+#
+# 	return math.atan2(self.goal[1]-self.pos.position.y, self.goal[0]-self.pos.position.x) - self.theta
+#
+#
+# def stop():
+#
+# 	self.vel_msg.linear.x = 0
+# 	self.vel_msg.angular.z = 0
+# 		self.vel_publisher.publish(self.vel_msg)
+
+
+def navigate(x,y,yaw):
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = 'map'
     goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose = Pose(Point(x,y,0.0),Quaternion(orientation.x,orientation.y,orientation.z,orientation.w)) ##sending according to amcl
+    goal.target_pose.pose = Pose(Point(x,y,0.0),Quaternion(0,0,0,1)) ##sending according to amcl
     global move_base
     move_base.send_goal(goal)
 
@@ -248,15 +271,17 @@ def go_to_place(request):
 
     paths =a_star_calculation(start,end)
     #paths =a_star_calculation({'x':101, 'y':230}, {'x':190, 'y':275})
-    print(paths)
-    time.sleep(1000)
+    #print(paths)
+    #time.sleep(1000)
     #waht about the yaw
-    for coordinate in enumerate(paths):
-        rospy.loginfo("Navigating to pose",coordinate)
+    previous_coordinate = start
+    for i,coordinate in enumerate(paths):
+        #rospy.loginfo("Navigating to pose",coordinate)
         #the coordinates are in pixel
         # world_points =pixel_to_world((coordinate['x'],coordinate['y']),image_size)
         # success = navigate(world_points[0],world_points[1],amcl_pose.orientation)
-        success = navigate(coordinate['x'],coordinate['y'])
+        success = navigate(coordinate['x'],coordinate['y'],0)
+        previous_coordinate = coordinate
         if not success:
             print("failed to reach pose",coordinate)
             time.sleep(1)

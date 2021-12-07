@@ -8,10 +8,12 @@ from my_simluations.srv import ui as _UI
 import time
 
 #drop off points for tables; format x,y,yaw
-tables_drop_off = [[1,2,1.2],
-          [2.1,3,1.4],[6,3,1.4],[2.1,3,1.4],[2.1,3,1.4],[2.1,3,1.4],[2.1,3,1.4],[2.1,3,1.4],]
+tables_drop_off = [[12.55,13.65,1.2],
+          [9.65,25.3,1.4]
+          ,[7.25,28.35,1.4]
+          ,[8.65,30.9,1.4]]
 
-kitchen_coordinates = [-1,-1.2,0]
+kitchen_coordinates = [6.9,16.8,0]
 
 #print(tables_drop_off[1][2])
 #reminder of how it works
@@ -106,7 +108,7 @@ if __name__ == "__main__":
             print("tables_received")
 
         if(out != -1):
-            UI_wait("Please place food to be delivered")
+            UI_wait("Please place food to be delivered to table "+str(y.table_deliver))
             print("going")
             request_location_client(tables_drop_off[out-1][0],tables_drop_off[out-1][1],tables_drop_off[out-1][2])
             time.sleep(5)
