@@ -8,10 +8,14 @@ from my_simluations.srv import ui as _UI
 import time
 
 #drop off points for tables; format x,y,yaw
-tables_drop_off = [[12.55,13.65,1.2],
-          [9.65,25.3,1.4]
-          ,[7.25,28.35,1.4]
-          ,[8.65,30.9,1.4]]
+tables_drop_off = [[12.6,23.4,1.2],
+          [9.75,23.1,1.4]
+          ,[8.1,26,1.4]
+          ,[12.6,26.6,1.4]
+          ,[12.5,28.05,1.4]
+          ,[6.2,29.5,1.4]
+          ,[9.75,29.9,1.4]
+          ,[9.65,26.7,1.4]]
 
 kitchen_coordinates = [6.9,16.8,0]
 
