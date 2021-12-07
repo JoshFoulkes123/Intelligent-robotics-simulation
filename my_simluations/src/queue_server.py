@@ -22,7 +22,7 @@ q2_clear = []    #for dequeuing
 
 #maintaining dicitonaries for table names and correspoding numbers
 
-table_dict= {"Table_1": 1,"Table_2":2,"Table_3":3,"Table_4":4}
+table_dict= {"Table_1": 1,"Table_2":2,"Table_3":3,"Table_4":4,"Table_5":5,"Table_6":6,"Table_7":7,"Table_8":8}
 table_name = list(table_dict.keys())
 table_numbers = list(table_dict.values())
 
