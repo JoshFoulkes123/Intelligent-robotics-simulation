@@ -3,6 +3,7 @@
 from os import path
 import os
 from pickle import NONE
+import numpy as np
 #from my_simluations.src.transformations import pixel_to_world, world_to_pixel
 import rospy
 import rospkg
@@ -12,16 +13,17 @@ from my_simluations.srv import goalResponse as _GOAL_resp
 from visualization_msgs.msg import MarkerArray, Marker
 import time
 import math
-from transformations import world_to_pixel, pixel_to_world, worldtheta_to_pixeltheta, real_to_pixel, pixel_to_real, getHeading, rotateQuaternion
+from transformations import world_to_pixel, pixel_to_world, worldtheta_to_pixeltheta, real_to_pixel, pixel_to_real, getHeading, rotateQuaternion, quaternion_to_euler_angle
 import actionlib
 from move_base_msgs.msg import MoveBaseGoal,MoveBaseAction
 from geometry_msgs.msg import Twist , Point , Quaternion, Pose, PoseWithCovarianceStamped
 from actionlib_msgs.msg import *
+import tf
 
 from my_simluations.srv import tables as _TABLES
 
 
-#start ={"x":0,"y":0}
+
 completeAStarMap = []
 threshhold = 0.4
 
@@ -30,7 +32,8 @@ ANGULAR_VELOCITY = 0.4
 
 
 def read_map():
-    img = open('/home/josh/catkin_ws/src/my_simluations/data/cafe_map.pgm', 'rb')
+    img = open('/home/mandarpatil/robotics/src/my_simluations/data/cafe_map.pgm', 'rb')
+    #img = open('/home/josh/catkin_ws/src/my_simluations/data/cafe_map.pgm', 'rb')
 
     #Header values before width and height
     img.readline()
@@ -105,22 +108,9 @@ def a_star_calculation(start, end):
         openList.pop(currentNodeNum)
         closedList.append(currentNode)
 
-  #      print('Start Node: (' + str(start['x']) + ',' + str(start['y']) + ')')
- ##       print('End Node: (' + str(end['x']) + ',' + str(end['y']) + ')')
-##       print('Current Node: (' + str(currentNode.x) + ',' + str(currentNode.y) + ')')
+
         #print('Current Node: ' + currentNode.toString(completeAStarMap))
-        #print('Size Open List: ' + str(len(openList)))
-#        print('Size Closed List: ' + str(len(closedList)))
-#        print()
-#        print("OPEN LIST")
-#        for node in openList:
-#            print('(' + str(node['x']) + ',' + str(node['y']) + ')')
-#        print()
-#        print("CLOSED LIST")
-#        for node in closedList:
-#            print('(' + str(node['x']) + ',' + str(node['y']) + ')')
-#        print()
-#        time.sleep(1)
+
 
         if currentNode.x == end['x'] and currentNode.y == end['y']:
             path_to_end = []
@@ -144,24 +134,10 @@ def a_star_calculation(start, end):
                 child = aStarNode(currentNode, child_position)
                 child.parent = currentNode
 
-#                print(child.toString())
+
                 children.append(child)
 
-#            if currentNode['x'] > 0:
-#                if currentNode['y'] > 0:
-#                    children.append(a_star_nodes[x-1][y-1])
-#                if currentNode['y'] < height - 1:
-#                    children.append(a_star_nodes[x-1][y+1])
-#            if currentNode['x'] < width - 1:
-#                children.append(a_star_nodes[x+1][y])
-#                if currentNode['y'] > 0:
-#                    children.append(a_star_nodes[x+1][y-1])
-#                if currentNode['y'] < height - 1:
-#                    children.append(a_star_nodes[x+1][y+1])
-#            if currentNode['y'] > 0:
-#                children.append(a_star_nodes[x][y-1])
-#            if currentNode['y'] < height - 1:
-#                children.append(a_star_nodes[x][y+1])
+
 
             for i in range(len(children)):
                 skip = False
@@ -243,14 +219,7 @@ def a_star_cleanup(aStarNodes):
     clean_a_star.append(aStarNodes[len(aStarNodes) -1])
 
     return clean_a_star
-# def slope(p1, p2):
-# 	delta_y = p2[1]-p1[1]
-# 	delta_x = p2[0]-p1[0]
-# 	return delta_y/delta_x if delta_x!=0 else float('inf')
-#
-# def euclidean_distance():
-#
-# 	return math.sqrt(math.pow((self.goal[0]-self.pos.position.x),2) + math.pow((self.goal[1]-self.pos.position.y),2))
+
 
 def angular_difference(pose_actual, pose_goal):
 
@@ -262,7 +231,7 @@ def stop(cmd_vel):
 	cmd_vel.linear.x = 0
 	cmd_vel.angular.z = 0
 
-
+#move_base code
 def navigate(x,y,yaw):
     goal = MoveBaseGoal()
     goal.target_pose.header.frame_id = 'map'
@@ -286,8 +255,8 @@ def amcl_callback(msg):
     print("inside amcl callback")
     global amcl_pose
     amcl_pose = msg.pose.pose
-    print(getHeading(amcl_pose.orientation))
-    print(amcl_pose)
+   # print(getHeading(amcl_pose.orientation))
+   # print(amcl_pose)
 
 def rotate_bot(goal_heading):
     curr_heading = getHeading(amcl_pose.orientation)
@@ -330,68 +299,69 @@ def go_to_place(request):
     print(start)
     print(end)
 
-    # global completeAStarMap
-    # global width, height
-    # completeAStarMap = read_map()
-    # width = len(completeAStarMap[0])
-    # height = len(completeAStarMap)
-    #start is in terms of world coordinates ..
-    # image_size = (height,width)
-    # world_points=(amcl_pose.position.x,amcl_pose.position.y)
-    # pixel_points=world_to_pixel(world_points,image_size)
-    # start = {'x':pixel_points[0],'y':pixel_points[1]}
+
 
     paths =a_star_calculation(start,end)
     paths = a_star_cleanup(paths)
     print(paths)
-    #paths =a_star_calculation({'x':101, 'y':230}, {'x':190, 'y':275})
-    #print(paths)
-    #time.sleep(1000)
-    #waht about the yaw
+    previous_coordinate = Pose()
     previous_coordinate = amcl_pose
     twist = Twist()
     twist.linear.x = ROBOT_SPEED
     pose_goal = Pose()
+    global move
+    r = rospy.Rate(4)
     for i,coordinate in enumerate(paths):
-        #rospy.loginfo("Navigating to pose",coordinate)
-        #the coordinates are in pixel
-        # world_points =pixel_to_world((coordinate['x'],coordinate['y']),image_size)
-        # success = navigate(world_points[0],world_points[1],amcl_pose.orientation)
 
-        pose_goal.position.x = coordinate['x']
-        pose_goal.position.y = coordinate['y']
-        heading = angular_difference(previous_coordinate, pose_goal)
-        print(coordinate['x'])
-        print(previous_coordinate.position.x)
-        inc_x = int(coordinate['x']) - int(previous_coordinate.position.x)
-        inc_y = int(coordinate['y']) - int(previous_coordinate.position.y)
 
-        print(inc_x)
-        print(inc_y)
+        # pose_goal.position.x = coordinate['x']
+        # pose_goal.position.y = coordinate['y']
+        pose_goal.position.x,pose_goal.position.y  = pixel_to_real(coordinate['x'],coordinate['y'])
+        #euler = tf.transformations.euler_from_quaternion(amcl_pose.orientation)
+        roll,pitch,yaw = quaternion_to_euler_angle(previous_coordinate.orientation.x,previous_coordinate.orientation.y,previous_coordinate.orientation.z,previous_coordinate.orientation.w)
+        print(yaw)
+        #time.sleep(100)
+        #heading = angular_difference(previous_coordinate, pose_goal)
+        #print(pose_goal.position.x)
+        #pixel to real
+
+        inc_x = int(pose_goal.position.x) - int(previous_coordinate.position.x)
+        inc_y = int(pose_goal.position.y) - int(previous_coordinate.position.y)
+
+        # print(inc_x)
+        # print(inc_y)
         angle_to_goal = math.atan2(inc_y, inc_x)
-        print(angle_to_goal)
-        rotate_bot(angle_to_goal)
-        pose_goal.orientation = rotateQuaternion(pose_goal.orientation,heading)
-        twist.angular.z = heading
-        previous_coordinate = pose_goal
-        move.publish(twist)
-        time.sleep(0.2)
-        # if not success:
-        #     print("failed to reach pose",coordinate)
-        #     time.sleep(1)
-        #     go_to_place(request)
-        #     break
-        #     # wait for a few second
-        #     #get the current coordinates and call go_to_place(req)
-        print("reached pose")
-    #move.publish(stop(twist))
+        print("angle to goal ",angle_to_goal)
+        #rotate_bot(angle_to_goal)
+        #pose_goal.orientation = rotateQuaternion(pose_goal.orientation,heading)
+        #twist.angular.z = heading
+        dist_to_goal = np.sqrt(inc_x*inc_x+inc_y*inc_y)
+        print("dist_to_goal :",dist_to_goal)
+        # previous_coordinate = pose_goal
+        twist.linear.x = 0.0
+        twist.angular.z = 0.0
+        if dist_to_goal >= 1 :
+            
+            if abs(angle_to_goal-yaw) >= 2:
+                twist.linear.x = 0.0
+                twist.angular.z = 0.15
+                move.publish(twist)
+                time.sleep(1)
+            
+            twist.linear.x = 0.08
+            twist.angular.z = 0.0
+            move.publish(twist)
+            time.sleep(1)
+            print("reached pose")
+            previous_coordinate = amcl_pose
+
+        r.sleep()
+        
 
 
 
-    print("At destination:")
-    print("x: " +str(end.x))
-    print("y: " +str(end.y))
-    print("yaw: " +str(end.yaw))
+
+
     return _GOAL_resp(100)
 
 def pathfinder_server():
@@ -409,7 +379,8 @@ if __name__ == "__main__":
     # width =  0
     # height =0
 
-    move = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+    move = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+    time.sleep(1)
     print("wait for server to come up")
     rospy.init_node("pathfinder")
     rospy.loginfo("hello from pathfinder")
