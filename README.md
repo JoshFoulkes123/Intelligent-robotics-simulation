@@ -19,7 +19,11 @@ Then run catkin_make.
 To launch the simulation run in separate terminals:
 
 `roslaunch my_simluations my_world.launch`
+
+
 `roslaunch my_simluations turtlebot_localisation.launch`
+
+
 `roslaunch my_simluations main.launch`
 
 localise your robot using teleop and the above localisation node.
