@@ -29,3 +29,7 @@ To launch the simulation run in separate terminals:
 localise your robot using teleop and the above localisation node.
 
 Run the pathfinder to navigate the robot to the particular tables to serve and clear.
+
+`rosrun my_simluations pathfinder_.py`
+
+hint: make all the python files under the my_simualtions/src as executable.
