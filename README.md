@@ -20,11 +20,16 @@ To launch the simulation run in separate terminals:
 
 `roslaunch my_simluations my_world.launch`
 
+Also press the play button in Gazebo to start the simulation before running the localisation
 
 `roslaunch my_simluations turtlebot_localisation.launch`
 
 
 `roslaunch my_simluations main.launch`
+
+
+`rosrun my_simluations robot_onboard_UI.py`
+
 
 localise your robot using teleop and the above localisation node.
 
